@@ -102,14 +102,17 @@ func NewClient(config *config.Connector) (Client, error) {
 			return nil, err
 		}
 
-		newClient.transport.TLS = tlsContent.config
 		newClient.transport.SASL = tlsContent.sasl
 
 		newClient.dialer = &kafka.Dialer{
 			Timeout:       10 * time.Second,
 			DualStack:     true,
-			TLS:           tlsContent.config,
 			SASLMechanism: tlsContent.sasl,
+		}
+
+		if config.Kafka.TlsEnabled {
+			newClient.transport.TLS = tlsContent.config
+			newClient.dialer.TLS = tlsContent.config
 		}
 	}
 	newClient.kafkaClient.Transport = newClient.transport
